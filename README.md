@@ -69,7 +69,7 @@ chipsd -daemon
 
 Once `chipsd` has synchronized with the network, you can start `lightningd` with the following command:
 
-    lightningd/lightningd --network=testnet --log-level=debug
+    lightningd/lightningd --log-level=debug
 
 ### Listing all commands:
 `cli/lightning-cli help` will print a table of the API and lists the
