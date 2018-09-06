@@ -41,5 +41,5 @@ gossipd/test/run-responder-success
 test/test_protocol
 test/test_sphinx
 privatebet/bet
-
+external/libcli.so
 tests/.pytest.restart

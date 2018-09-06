@@ -352,7 +352,8 @@ int main(int argc, char *argv[])
 #endif
 
 int cli_main(char *buffer,int32_t maxsize,int argc, char *argv[]);
-int main(int argc, char *argv[])
+int ln_bet(int argc, char *argv[]);
+int ln_bet(int argc, char *argv[])
 {
     int32_t retval = -1,maxsize = 1000000; char *buffer = malloc(maxsize);
     if ( buffer != 0 )
