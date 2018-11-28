@@ -352,22 +352,22 @@ int main(int argc, char *argv[])
 #endif
 
 int cli_main(char *buffer,int32_t maxsize,int argc, char *argv[]);
-int ln_bet(int argc, char *argv[]);
-int ln_bet(int argc, char *argv[])
+int ln_bet(int argc, char *argv[],char *buffer);
+int ln_bet(int argc, char *argv[],char *buffer)
 {
-    int32_t retval = -1,maxsize = 1000000; char *buffer = malloc(maxsize);
+    int32_t retval = -1,maxsize = 1000000; //char *buffer = malloc(maxsize);
     if ( buffer != 0 )
     {
         if ( cli_main(buffer,maxsize,argc,argv) == 0 )
         {
-            printf("%s",buffer);
+            printf("\n%s:%d:%s",__FUNCTION__,__LINE__,buffer);
             retval = 1;
         }
         else
         {
             printf("error %s",buffer);
         }
-        free(buffer);
+        //free(buffer);
     }
     return(retval);
 }
