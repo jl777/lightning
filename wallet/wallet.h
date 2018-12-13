@@ -648,6 +648,11 @@ void wallet_invoice_details(const tal_t *ctx,
 			    struct invoice_details *details);
 
 /**
+* Gives the invoice count
+**/
+int wallet_invoice_count(struct wallet *wallet);
+
+/**
  * wallet_htlc_stubs - Retrieve HTLC stubs for the given channel
  *
  * Load minimal necessary information about HTLCs for the on-chain
@@ -800,4 +805,8 @@ void wallet_utxoset_add(struct wallet *w, const struct bitcoin_tx *tx,
 			const u32 outnum, const u32 blockheight,
 			const u32 txindex, const u8 *scriptpubkey,
 			const u64 satoshis);
+
+int wallet_invoice_count(struct wallet *wallet);
+
+
 #endif /* LIGHTNING_WALLET_WALLET_H */

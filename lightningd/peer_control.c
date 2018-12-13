@@ -44,6 +44,7 @@
 #include <wally_bip32.h>
 #include <wire/gen_onion_wire.h>
 
+#include <stdio.h>
 static void destroy_peer(struct peer *peer)
 {
 	list_del_from(&peer->ld->peers, &peer->list);
@@ -1211,4 +1212,65 @@ static const struct json_command dev_forget_channel_command = {
 	"Forget the channel with peer {id}. Checks if the channel is still active by checking its funding transaction. Check can be ignored by setting {force} to 'true'"
 };
 AUTODATA(json_command, &dev_forget_channel_command);
+
+static void json_peer_channel_state(struct command *cmd, const char *buffer,
+				    const jsmntok_t *params)
+{
+	struct json_result *response = new_json_result(cmd);
+	jsmntok_t *idtok;
+	char buf[100];
+	sqlite3_stmt *stmt;
+	int channel_state=-1;
+	if (!json_get_params(cmd, buffer, params,
+			     "id", &idtok,
+			     NULL)) {
+		return;
+	}
+	memcpy(buf,buffer + idtok->start,idtok->end - idtok->start);
+	buf[idtok->end - idtok->start]='\0';
+	printf("\n%s:%d:id:%s",__FUNCTION__,__LINE__,buf);
+	stmt = db_prepare(cmd->ld->wallet->db,
+						  "SELECT state"
+						  " FROM channels"
+						  " Where id IN "
+						  " (SELECT id"
+						  "  FROM peers"
+						  "  WHERE lower(hex(node_id))=?);");
+	sqlite3_bind_text(stmt, 1, buf, strlen(buf), SQLITE_TRANSIENT);
+	while (sqlite3_step(stmt) != SQLITE_DONE) {
+		int i;
+		int num_cols = sqlite3_column_count(stmt);
+		
+		for (i = 0; i < num_cols; i++)
+		{
+			switch (sqlite3_column_type(stmt, i))
+			{
+			case (SQLITE3_TEXT):
+				printf("%s, ", sqlite3_column_text(stmt, i));
+				break;
+			case (SQLITE_INTEGER):
+				channel_state=sqlite3_column_int(stmt, i);
+				break;
+			case (SQLITE_FLOAT):
+				printf("%g, ", sqlite3_column_double(stmt, i));
+				break;
+			default:
+				break;
+			}
+		}
+	}
+	sqlite3_finalize(stmt);
+	json_object_start(response, NULL);
+	json_add_num(response, "channel-state", channel_state);
+	json_object_end(response);
+	command_success(cmd, response);
+}
+
+static const struct json_command peer_channel_state = {
+	"peer-channel-state", 
+	json_peer_channel_state,
+	"Find the state of the channel with the peer {id}"
+};
+AUTODATA(json_command, &peer_channel_state);
+
 #endif /* DEVELOPER */

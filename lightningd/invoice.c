@@ -21,6 +21,7 @@
 #include <sodium/randombytes.h>
 #include <wire/wire_sync.h>
 
+#include "../wallet/invoices.h"
 static const char *invoice_status_str(const struct invoice_details *inv)
 {
 	if (inv->state == PAID)
@@ -753,3 +754,26 @@ static const struct json_command decodepay_command = {
 	"Decode {bolt11}, using {description} if necessary"
 };
 AUTODATA(json_command, &decodepay_command);
+
+
+static void json_invoice_count(struct command *cmd,
+			 const char *buffer, const jsmntok_t *params)
+{
+	
+	struct json_result *response = new_json_result(cmd);
+	
+	int invoice_count;
+	invoice_count=wallet_invoice_count(cmd->ld->wallet);
+
+	json_object_start(response, NULL);
+	json_add_num(response,"invoice count",invoice_count);
+	json_object_end(response);
+	command_success(cmd, response);
+	
+}
+static const struct json_command bet_command = {
+	"invoice-count",
+	json_invoice_count,
+	"Gives the count of the invoices"
+};
+AUTODATA(json_command, &bet_command);

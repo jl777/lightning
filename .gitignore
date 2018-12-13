@@ -33,7 +33,7 @@ common/test/run-json
 common/test/run-sphinx
 daemon/test/run-maxfee
 external/libbacktrace-build/
-external/libbacktrace.a
+#external/libbacktrace.a
 external/libbacktrace.la
 gossipd/test/run-find_route-specific
 gossipd/test/run-initiator-success
@@ -41,5 +41,5 @@ gossipd/test/run-responder-success
 test/test_protocol
 test/test_sphinx
 privatebet/bet
-
+external/libcli.so
 tests/.pytest.restart

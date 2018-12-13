@@ -138,6 +138,10 @@ void invoices_get_details(const tal_t *ctx UNNEEDED,
 			  struct invoice invoice UNNEEDED,
 			  struct invoice_details *details UNNEEDED)
 { fprintf(stderr, "invoices_get_details called!\n"); abort(); }
+/* Generated stub for invoices_count */
+int invoices_count(struct invoices *invoices UNNEEDED)
+{ fprintf(stderr, "invoices_get_details called!\n"); abort(); }	
+
 /* Generated stub for invoices_iterate */
 bool invoices_iterate(struct invoices *invoices UNNEEDED,
 		      struct invoice_iterator *it UNNEEDED)

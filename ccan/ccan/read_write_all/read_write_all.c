@@ -33,7 +33,6 @@ bool read_all(int fd, void *data, size_t size)
 		data = (char *)data + done;
 		size -= done;
 	}
-
 	return true;
 }
 

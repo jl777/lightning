@@ -1482,6 +1482,10 @@ void wallet_invoice_details(const tal_t *ctx,
 	invoices_get_details(ctx, wallet->invoices, invoice, details);
 }
 
+int wallet_invoice_count(struct wallet *wallet)
+{
+	return invoices_count(wallet->invoices);
+}
 
 struct htlc_stub *wallet_htlc_stubs(const tal_t *ctx, struct wallet *wallet,
 				    struct channel *chan)
