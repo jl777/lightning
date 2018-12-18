@@ -1229,10 +1229,10 @@ static void json_peer_channel_state(struct command *cmd, const char *buffer,
 	memcpy(buf,buffer + idtok->start,idtok->end - idtok->start);
 	buf[idtok->end - idtok->start]='\0';
 	stmt = db_prepare(cmd->ld->wallet->db,
-						  "SELECT state"
+						  "SELECT COALESCE(sum(state),0)"
 						  " FROM channels"
 						  " Where id IN "
-						  " (SELECT id"
+						  " (SELECT COALESCE(sum(id),0)"
 						  "  FROM peers"
 						  "  WHERE lower(hex(node_id))=?);");
 	sqlite3_bind_text(stmt, 1, buf, strlen(buf), SQLITE_TRANSIENT);
@@ -1287,7 +1287,7 @@ static void json_check_if_peer_exits(struct command *cmd, const char *buffer,
 	memcpy(buf,buffer + idtok->start,idtok->end - idtok->start);
 	buf[idtok->end - idtok->start]='\0';
 	stmt = db_prepare(cmd->ld->wallet->db,
-						  "SELECT COALESCE(id,-1)"
+						  "SELECT COALESCE(id,0)"
 						  " FROM peers"
 						  "  WHERE lower(hex(node_id))=?;");
 	sqlite3_bind_text(stmt, 1, buf, strlen(buf), SQLITE_TRANSIENT);
