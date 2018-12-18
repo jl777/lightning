@@ -360,7 +360,6 @@ int ln_bet(int argc, char *argv[],char *buffer)
     {
         if ( cli_main(buffer,maxsize,argc,argv) == 0 )
         {
-            printf("\n%s:%d:%s",__FUNCTION__,__LINE__,buffer);
             retval = 1;
         }
         else

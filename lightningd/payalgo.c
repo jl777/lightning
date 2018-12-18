@@ -18,6 +18,7 @@
 #include <sodium/randombytes.h>
 #include <wallet/wallet.h>
 
+#include <stdio.h>
 /* Record of failures. */
 enum pay_failure_type {
 	FAIL_UNPARSEABLE_ONION,

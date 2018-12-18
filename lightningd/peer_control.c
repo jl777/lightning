@@ -1228,7 +1228,6 @@ static void json_peer_channel_state(struct command *cmd, const char *buffer,
 	}
 	memcpy(buf,buffer + idtok->start,idtok->end - idtok->start);
 	buf[idtok->end - idtok->start]='\0';
-	printf("\n%s:%d:id:%s",__FUNCTION__,__LINE__,buf);
 	stmt = db_prepare(cmd->ld->wallet->db,
 						  "SELECT state"
 						  " FROM channels"
@@ -1271,6 +1270,68 @@ static const struct json_command peer_channel_state = {
 	json_peer_channel_state,
 	"Find the state of the channel with the peer {id}"
 };
+
+static void json_check_if_peer_exits(struct command *cmd, const char *buffer,
+				    const jsmntok_t *params)
+{
+	struct json_result *response = new_json_result(cmd);
+	jsmntok_t *idtok;
+	char buf[100];
+	sqlite3_stmt *stmt;
+	int peer_exits=-1;
+	if (!json_get_params(cmd, buffer, params,
+			     "id", &idtok,
+			     NULL)) {
+		return;
+	}
+	memcpy(buf,buffer + idtok->start,idtok->end - idtok->start);
+	buf[idtok->end - idtok->start]='\0';
+	stmt = db_prepare(cmd->ld->wallet->db,
+						  "SELECT COALESCE(id,-1)"
+						  " FROM peers"
+						  "  WHERE lower(hex(node_id))=?;");
+	sqlite3_bind_text(stmt, 1, buf, strlen(buf), SQLITE_TRANSIENT);
+	while (sqlite3_step(stmt) != SQLITE_DONE) {
+		int i;
+		int num_cols = sqlite3_column_count(stmt);
+		
+		for (i = 0; i < num_cols; i++)
+		{
+			switch (sqlite3_column_type(stmt, i))
+			{
+			case (SQLITE3_TEXT):
+				printf("%s, ", sqlite3_column_text(stmt, i));
+				break;
+			case (SQLITE_INTEGER):
+				peer_exits=sqlite3_column_int(stmt, i);
+				break;
+			case (SQLITE_FLOAT):
+				printf("%g, ", sqlite3_column_double(stmt, i));
+				break;
+			default:
+				break;
+			}
+		}
+	}
+	sqlite3_finalize(stmt);
+	json_object_start(response, NULL);
+	if(peer_exits!=-1)
+		json_add_string(response,"peer-exists","true");
+	else
+		json_add_string(response,"peer-exists","false");
+	json_object_end(response);
+	command_success(cmd, response);
+}
+
+
 AUTODATA(json_command, &peer_channel_state);
+
+static const struct json_command check_if_peer_exits = {
+	"check-if-peer-exists", 
+	json_check_if_peer_exits,
+	"Finds if there exists the peer with {id}"
+};
+AUTODATA(json_command, &check_if_peer_exits);
+
 
 #endif /* DEVELOPER */
