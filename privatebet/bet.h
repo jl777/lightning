@@ -310,8 +310,6 @@ struct privatebet_share
 	struct pair256 player_key;
 };
 
-//added by sg777
-
 struct deck_player_info
 {
 	struct pair256 player_key;

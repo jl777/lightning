@@ -787,6 +787,7 @@ static bool wallet_ever_used(struct wallet *w)
  * chaintopology actually subtracts another 100 blocks to make sure we
  * catch chain forks.
  */
+
 u32 wallet_first_blocknum(struct wallet *w, u32 first_possible)
 {
 	int err;
@@ -1482,6 +1483,10 @@ void wallet_invoice_details(const tal_t *ctx,
 	invoices_get_details(ctx, wallet->invoices, invoice, details);
 }
 
+int wallet_invoice_count(struct wallet *wallet)
+{
+	return invoices_count(wallet->invoices);
+}
 
 struct htlc_stub *wallet_htlc_stubs(const tal_t *ctx, struct wallet *wallet,
 				    struct channel *chan)

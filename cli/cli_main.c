@@ -32,15 +32,21 @@ static void *opt_allocfn(size_t size)
 
 static void *tal_reallocfn(void *ptr, size_t size)
 {
+	
     if (!ptr)
         return opt_allocfn(size);
-    tal_resize_(&ptr, 1, size, false);
-    return ptr;
+	else
+	{
+		//tal_resize_(&ptr, 1, size, false);
+		//free(ptr);
+		return opt_allocfn(size);
+	}
+    //return ptr;
 }
 
 static void tal_freefn(void *ptr)
 {
-    tal_free(ptr);
+    //tal_free(ptr);
 }
 
 struct netaddr;
@@ -65,7 +71,11 @@ int cli_main(char *buffer,int32_t maxsize,int argc, char *argv[])
     const tal_t *ctx = tal(NULL, char);
     size_t num_opens, num_closes;
     bool valid;
-    
+
+	printf("Arguments of the command received from bet\n");
+	for(int i=0;i<argc;i++)
+		printf("%s\n",argv[i]);
+	
     err_set_progname(argv[0]);
     
     opt_set_alloc(opt_allocfn, tal_reallocfn, tal_freefn);
@@ -151,7 +161,7 @@ int cli_main(char *buffer,int32_t maxsize,int argc, char *argv[])
         /* Result is OK, so dump it */
         resp += strlen("{ \"result\" : ");
         printf("%.*s\n", (int)(strlen(resp) - strlen(result_end)), resp);
-        tal_free(ctx);
+        //tal_free(ctx);
         return 0;
     }
     
@@ -195,15 +205,14 @@ int cli_main(char *buffer,int32_t maxsize,int argc, char *argv[])
         if ( strlen(json_tok_contents(resp, result)) < maxsize )
             sprintf(buffer,"%.*s\n",json_tok_len(result), json_tok_contents(resp, result));
         else strcpy(buffer,"{\"error\":\"return too big\"}");
-        //printf("%.*s\n",json_tok_len(result),json_tok_contents(resp, result));
-        tal_free(ctx);
-        close(fd);
+        //tal_free(ctx);
+        //close(fd);
         return 0;
     }
     if ( strlen(json_tok_contents(resp, error)) < maxsize )
         sprintf(buffer,"%.*s\n",json_tok_len(error), json_tok_contents(resp, error));
     else strcpy(buffer,"{\"error\":\"return too big\"}");
-    tal_free(ctx);
+    //tal_free(ctx);
     close(fd);
     return 1;
 }

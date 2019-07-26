@@ -44,6 +44,7 @@
 #include <wally_bip32.h>
 #include <wire/gen_onion_wire.h>
 
+#include <stdio.h>
 static void destroy_peer(struct peer *peer)
 {
 	list_del_from(&peer->ld->peers, &peer->list);
@@ -1211,4 +1212,157 @@ static const struct json_command dev_forget_channel_command = {
 	"Forget the channel with peer {id}. Checks if the channel is still active by checking its funding transaction. Check can be ignored by setting {force} to 'true'"
 };
 AUTODATA(json_command, &dev_forget_channel_command);
+
+static void json_peer_channel_state(struct command *cmd, const char *buffer,
+				    const jsmntok_t *params)
+{
+	struct json_result *response = new_json_result(cmd);
+	jsmntok_t *idtok;
+	char buf[100];
+	sqlite3_stmt *stmt,*stmt1;
+	int channel_state=-1,peer_exits;
+	if (!json_get_params(cmd, buffer, params,
+			     "id", &idtok,
+			     NULL)) {
+		return;
+	}
+	memcpy(buf,buffer + idtok->start,idtok->end - idtok->start);
+	buf[idtok->end - idtok->start]='\0';
+	/*stmt = db_prepare(cmd->ld->wallet->db,
+						  "SELECT COALESCE(sum(state),0)"
+						  " FROM channels"
+						  " Where id IN "
+						  " (SELECT COALESCE(sum(id),0)"
+						  "  FROM peers"
+						  "  WHERE lower(hex(node_id))=?);");*/
+	stmt = db_prepare(cmd->ld->wallet->db,"SELECT count(*) FROM peers WHERE lower(hex(node_id))=?;");
+	sqlite3_bind_text(stmt, 1, buf, strlen(buf), SQLITE_TRANSIENT);
+	
+	while (sqlite3_step(stmt) == SQLITE_ROW) {
+		int i;
+		int num_cols = sqlite3_column_count(stmt);
+		
+		for (i = 0; i < num_cols; i++)
+		{
+			switch (sqlite3_column_type(stmt, i))
+			{
+			case (SQLITE_INTEGER):
+				peer_exits=sqlite3_column_int(stmt, i);
+				break;
+			default:
+				break;
+			}
+		}
+	}
+	sqlite3_finalize(stmt);
+	json_object_start(response, NULL);
+	json_array_start(response,"channel-states");
+	if(peer_exits == 0)
+	{
+		json_object_start(response,NULL);
+		json_add_num(response, "channel-state", 0);
+		json_object_end(response);
+	}
+	else
+	{
+		
+			stmt1 = db_prepare(cmd->ld->wallet->db,"SELECT state FROM channels WHERE peer_id IN (SELECT id FROM peers WHERE lower(hex(node_id))=?);");
+			sqlite3_bind_text(stmt1, 1, buf, strlen(buf), SQLITE_TRANSIENT);
+			
+			while (sqlite3_step(stmt1) == SQLITE_ROW) {
+				int i;
+				int num_cols = sqlite3_column_count(stmt1);
+				
+				for (i = 0; i < num_cols; i++)
+				{
+					switch (sqlite3_column_type(stmt1, i))
+					{
+					case (SQLITE_INTEGER):
+						json_object_start(response,NULL);
+						channel_state=sqlite3_column_int(stmt1, i);
+						json_add_num(response, "channel-state", channel_state);
+						json_object_end(response);
+						break;
+					default:
+						break;
+					}
+				}
+			}
+			sqlite3_finalize(stmt1);
+		
+	}
+	json_array_end(response);
+	json_object_end(response);
+	command_success(cmd, response);
+}
+
+static const struct json_command peer_channel_state = {
+	"peer-channel-state", 
+	json_peer_channel_state,
+	"Find the state of the channel with the peer {id}"
+};
+
+static void json_check_if_peer_exits(struct command *cmd, const char *buffer,
+				    const jsmntok_t *params)
+{
+	struct json_result *response = new_json_result(cmd);
+	jsmntok_t *idtok;
+	char buf[100];
+	sqlite3_stmt *stmt;
+	int peer_exits=-1;
+	if (!json_get_params(cmd, buffer, params,
+			     "id", &idtok,
+			     NULL)) {
+		return;
+	}
+	memcpy(buf,buffer + idtok->start,idtok->end - idtok->start);
+	buf[idtok->end - idtok->start]='\0';
+	stmt = db_prepare(cmd->ld->wallet->db,
+						  "SELECT COALESCE(id,0)"
+						  " FROM peers"
+						  "  WHERE lower(hex(node_id))=?;");
+	sqlite3_bind_text(stmt, 1, buf, strlen(buf), SQLITE_TRANSIENT);
+	while (sqlite3_step(stmt) != SQLITE_DONE) {
+		int i;
+		int num_cols = sqlite3_column_count(stmt);
+		
+		for (i = 0; i < num_cols; i++)
+		{
+			switch (sqlite3_column_type(stmt, i))
+			{
+			case (SQLITE3_TEXT):
+				printf("%s, ", sqlite3_column_text(stmt, i));
+				break;
+			case (SQLITE_INTEGER):
+				peer_exits=sqlite3_column_int(stmt, i);
+				break;
+			case (SQLITE_FLOAT):
+				printf("%g, ", sqlite3_column_double(stmt, i));
+				break;
+			default:
+				break;
+			}
+		}
+	}
+	sqlite3_finalize(stmt);
+	json_object_start(response, NULL);
+	if(peer_exits!=-1)
+		json_add_string(response,"peer-exists","true");
+	else
+		json_add_string(response,"peer-exists","false");
+	json_object_end(response);
+	command_success(cmd, response);
+}
+
+
+AUTODATA(json_command, &peer_channel_state);
+
+static const struct json_command check_if_peer_exits = {
+	"check-if-peer-exists", 
+	json_check_if_peer_exits,
+	"Finds if there exists the peer with {id}"
+};
+AUTODATA(json_command, &check_if_peer_exits);
+
+
 #endif /* DEVELOPER */

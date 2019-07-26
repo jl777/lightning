@@ -1,7 +1,7 @@
 #include <common/wireaddr.h>
 #include <lightningd/gossip_msg.h>
 #include <wire/wire.h>
-
+#include <stdio.h>
 struct gossip_getnodes_entry *fromwire_gossip_getnodes_entry(const tal_t *ctx, const u8 **pptr, size_t *max)
 {
 	u8 numaddresses, i;

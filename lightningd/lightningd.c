@@ -370,7 +370,6 @@ int main(int argc, char *argv[])
 					       ->when_lightning_became_cool);
 
     db_commit_transaction(ld->wallet->db);
-
     printf("setup_topology\n");
 /* Initialize block topology (does its own transaction) */
 	setup_topology(ld->topology,

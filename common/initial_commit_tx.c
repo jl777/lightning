@@ -5,6 +5,7 @@
 #include <common/keyset.h>
 #include <common/permute_tx.h>
 #include <common/utils.h>
+#include <stdio.h>
 
 /* BOLT #3:
  *
@@ -87,7 +88,7 @@ struct bitcoin_tx *initial_commit_tx(const tal_t *ctx,
 	 * fee](#fee-calculation).
 	 */
 	base_fee_msat = commit_tx_base_fee(feerate_per_kw, untrimmed) * 1000;
-
+	
 	/* BOLT #3:
 	 *
 	 * 3. Subtract this base fee from the funder (either `to_local` or

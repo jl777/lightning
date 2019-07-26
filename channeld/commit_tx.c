@@ -6,6 +6,7 @@
 #include <common/keyset.h>
 #include <common/permute_tx.h>
 #include <common/utils.h>
+#include <stdio.h>
 
 #ifndef SUPERVERBOSE
 #define SUPERVERBOSE(...)
@@ -122,7 +123,6 @@ struct bitcoin_tx *commit_tx(const tal_t *ctx,
 	 * fee](#fee-calculation).
 	 */
 	base_fee_msat = commit_tx_base_fee(feerate_per_kw, untrimmed) * 1000;
-
 	SUPERVERBOSE("# base commitment transaction fee = %"PRIu64"\n",
 		     base_fee_msat / 1000);
 

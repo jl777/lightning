@@ -14,7 +14,7 @@
 #include <sodium/randombytes.h>
 #include <sqlite3.h>
 #include <string.h>
-
+#include <stdio.h>
 struct invoice_waiter {
 	/* Is this waiter already triggered? */
 	bool triggered;
@@ -630,4 +630,37 @@ void invoices_get_details(const tal_t *ctx,
 	wallet_stmt2invoice_details(ctx, stmt, dtl);
 
 	sqlite3_finalize(stmt);
+}
+
+int invoices_count(struct invoices *invoices)
+{
+	sqlite3_stmt *stmt;
+	int invoice_count;
+	stmt = db_prepare(invoices->db,
+					  "SELECT count(*)"
+					  "  FROM invoices;");
+	while (sqlite3_step(stmt) != SQLITE_DONE) {
+		int i;
+		int num_cols = sqlite3_column_count(stmt);
+		
+		for (i = 0; i < num_cols; i++)
+		{
+			switch (sqlite3_column_type(stmt, i))
+			{
+			case (SQLITE3_TEXT):
+				printf("%s, ", sqlite3_column_text(stmt, i));
+				break;
+			case (SQLITE_INTEGER):
+				invoice_count=sqlite3_column_int(stmt, i);
+				break;
+			case (SQLITE_FLOAT):
+				printf("%g, ", sqlite3_column_double(stmt, i));
+				break;
+			default:
+				break;
+			}
+		}
+	}
+		sqlite3_finalize(stmt);
+	return invoice_count;
 }

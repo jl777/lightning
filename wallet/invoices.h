@@ -230,4 +230,7 @@ void invoices_get_details(const tal_t *ctx,
 			  struct invoice invoice,
 			  struct invoice_details *details);
 
+int invoices_count(struct invoices *invoices);
+
+
 #endif /* LIGHTNING_WALLET_INVOICES_H */

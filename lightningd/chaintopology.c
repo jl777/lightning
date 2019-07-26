@@ -596,12 +596,14 @@ static u32 guess_feerate(const struct chain_topology *topo, enum feerate feerate
 		}
 		rate /= 2;
 	}
-
+	printf("\n%s:%d::fee rate:%d\n",__FUNCTION__,__LINE__,rate);
 	if (rate == 0) {
 		rate = topo->default_fee_rate >> feerate;
+		printf("\n%s:%d::fee rate:%d\n",__FUNCTION__,__LINE__,rate);
 		log_info(topo->log,
 			 "No fee estimate for %s: basing on default fee rate",
 			 feerate_name(feerate));
+		rate=1000;// The rate is hardcoded to 1 satoshi in default case
 	}
 
 	return rate;
@@ -761,7 +763,7 @@ struct chain_topology *new_topology(struct lightningd *ld, struct log *log)
 	txwatch_hash_init(&topo->txwatches);
 	txowatch_hash_init(&topo->txowatches);
 	topo->log = log;
-	topo->default_fee_rate = 40000;
+	topo->default_fee_rate = 4000; //changed to 4000 from 40000 by sg777
 	topo->override_fee_rate = NULL;
 	topo->bitcoind = new_bitcoind(topo, ld, log);
 	topo->wallet = ld->wallet;

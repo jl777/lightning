@@ -10,6 +10,8 @@ LIBBASE58_HEADERS := external/libbase58/libbase58.h
 EXTERNAL_HEADERS := $(LIBSODIUM_HEADERS) $(LIBWALLY_HEADERS) $(LIBSECP_HEADERS) $(JSMN_HEADERS) $(LIBBASE58_HEADERS)
 EXTERNAL_LIBS := external/libwallycore.a external/libsecp256k1.a external/libsodium.a external/libjsmn.a external/libbase58.a external/libbacktrace.a
 
+EXTERNAL_LIBS_CLEAN := external/libwallycore.a external/libsecp256k1.a external/libsodium.a external/libjsmn.a external/libbase58.a
+
 EXTERNAL_INCLUDE_FLAGS :=					\
 	-I external/libsodium/src/libsodium/include		\
 	-I external/libwally-core/include/			\
@@ -82,7 +84,7 @@ distclean: external-distclean
 clean: external-clean
 
 external-clean:
-	$(RM) $(EXTERNAL_LIBS) external/*.la external/*.o
+	$(RM) $(EXTERNAL_LIBS_CLEAN) external/*.la external/*.o
 	if [ -f external/libsodium/Makefile ]; then make -C external/libsodium clean; fi
 	if [ -f external/libwally-core/Makefile ]; then make -C external/libwally-core clean; fi
 	if [ -f external/ibwally-core/src/Makefile ]; then make -C external/libwally-core/src clean; fi
